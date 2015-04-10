@@ -9,13 +9,19 @@ class Dataset:
         self.vectorData = []
         self.data = []
         self.labels = []
-    def load(self, filePath):
+        self.wordDic = {}
+    def loadTrain(self, filePath):
         f = open(filePath, "r")
         lines = f.readlines()
         for line in lines:
             label = line.split(self.separator)[-1]
             self.data.append(line[:-(len(label)+1)])
             self.labels.append(label.replace("\n",""))
+    def loadTest(self, filePath):
+        f = open(filePath, "r")
+        lines = f.readlines()
+        for line in lines:
+            self.data.append(line.replace("\n",""))
     def printDataset(self):
         print self.data,self.labels
         if self.vectorData: print self.vectorData
@@ -39,19 +45,20 @@ class Dataset:
         stemmer = nltk.stem.snowball.SnowballStemmer(self.language)
         for i in range(len(self.data)):
             self.data[i] = [stemmer.stem(w) for w in self.data[i]]
-    def vectorize(self):
-        featureIndex = 0
-        wordDic = {}
-        for sentence in self.data:
-            for word in sentence:
-                if word not in wordDic:
-                    wordDic[word] = featureIndex
-                    featureIndex += 1
+    def vectorize(self, wordDic = None):
+        if not wordDic:
+            featureIndex = 0
+            for sentence in self.data:
+                for word in sentence:
+                    if word not in self.wordDic:
+                        self.wordDic[word] = featureIndex
+                        featureIndex += 1
+            wordDic = self.wordDic
         n = len(wordDic)
         for sentence in self.data:
             vec = [0]*n
             for word in sentence:
-                vec[wordDic[word]] += 1
+                if word in wordDic: vec[wordDic[word]] += 1
             self.vectorData.append(vec)
 
 class Classifier:
@@ -63,25 +70,29 @@ class Classifier:
         else:
             self.clf = sklearn.svm.SVC(kernel = kernel)
         self.clf.fit(dataset.vectorData,dataset.labels)
-
+    def predict(self, testset):
+        print self.clf.predict(testset.vectorData)
+        
     
 
 ds = Dataset()
 ds.setLanguage('english')
-ds.load(sys.argv[1])
+ds.loadTrain(sys.argv[1])
 ds.tokenize()
 ds.expandSynonyms()
 ds.lowercase()
 ds.stem()
 ds.vectorize()
-ds.printDataset()
+
+ts = Dataset()
+ts.setLanguage('english')
+ts.loadTest(sys.argv[2])
+ts.tokenize()
+ts.expandSynonyms()
+ts.lowercase()
+ts.stem()
+ts.vectorize(ds.wordDic)
 
 clf = Classifier()
 clf.buildSVM(ds)
-
-
-
-
-
-
-
+clf.predict(ts)

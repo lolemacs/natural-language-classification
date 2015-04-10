@@ -1,9 +1,9 @@
 import nltk
-import sklearn
+import sklearn.svm
 import sys
 from nltk.corpus import wordnet as wn
 
-class NLC:
+class Dataset:
     def __init__(self):
         self.separator = ","
         self.vectorData = []
@@ -53,17 +53,33 @@ class NLC:
             for word in sentence:
                 vec[wordDic[word]] += 1
             self.vectorData.append(vec)
-        
 
-nlc = NLC()
-nlc.setLanguage('english')
-nlc.load(sys.argv[1])
-nlc.tokenize()
-nlc.expandSynonyms()
-nlc.lowercase()
-nlc.stem()
-nlc.vectorize()
-nlc.printDataset()
+class Classifier:
+    def __init__(self):
+        self.clf = None
+    def buildSVM(self, dataset, kernel = 'linear'):
+        if kernel == 'linear':
+            self.clf = sklearn.svm.LinearSVC()
+        else:
+            self.clf = sklearn.svm.SVC(kernel = kernel)
+        self.clf.fit(dataset.vectorData,dataset.labels)
+
+    
+
+ds = Dataset()
+ds.setLanguage('english')
+ds.load(sys.argv[1])
+ds.tokenize()
+ds.expandSynonyms()
+ds.lowercase()
+ds.stem()
+ds.vectorize()
+ds.printDataset()
+
+clf = Classifier()
+clf.buildSVM(ds)
+
+
 
 
 

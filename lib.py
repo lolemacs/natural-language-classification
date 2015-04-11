@@ -72,6 +72,10 @@ class Classifier:
         self.clf.fit(dataset.vectorData,dataset.labels)
     def predict(self, testset):
         print self.clf.predict(testset.vectorData)
+    def test(self, testset, testlabels):
+        preds = self.clf.predict(testset.vectorData)
+        correct = sum(preds[i] == testlabels[i] for i in range(len(testlabels)))
+        return float(correct)/len(testlabels)
         
     
 

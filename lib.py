@@ -76,6 +76,12 @@ class Classifier:
         preds = self.clf.predict(testset.vectorData)
         correct = sum(preds[i] == testlabels[i] for i in range(len(testlabels)))
         return float(correct)/len(testlabels)
+    def mainWords(self, threshold):
+        invVocab = {v: k for k, v in self.wordDic.items()}
+        for i in range(len(self.clf.coef_[0])):
+            c = self.clf.coef_[0][i]
+            if abs(c) > threshold:
+                print invVocab[i], c
         
     
 

@@ -64,11 +64,11 @@ class Dataset:
 class Classifier:
     def __init__(self):
         self.clf = None
-    def buildSVM(self, dataset, kernel = 'linear'):
+    def buildSVM(self, dataset, kernel = 'linear', c):
         if kernel == 'linear':
-            self.clf = sklearn.svm.LinearSVC()
+            self.clf = sklearn.svm.LinearSVC(C=c)
         else:
-            self.clf = sklearn.svm.SVC(kernel = kernel)
+            self.clf = sklearn.svm.SVC(kernel = kernel,C=c)
         self.clf.fit(dataset.vectorData,dataset.labels)
     def predict(self, testset):
         print self.clf.predict(testset.vectorData)
